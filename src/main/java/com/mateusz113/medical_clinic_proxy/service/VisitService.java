@@ -1,45 +1,27 @@
 package com.mateusz113.medical_clinic_proxy.service;
 
 import com.mateusz113.medical_clinic_proxy.client.VisitClient;
+import com.mateusz113.medical_clinic_proxy.filter.visit.ExternalVisitFilter;
+import com.mateusz113.medical_clinic_proxy.filter.visit.InternalVisitFilter;
+import com.mateusz113.medical_clinic_proxy.mapper.visit.InternalVisitFilterMapper;
 import com.mateusz113.medical_clinic_proxy.model.PageableContentDto;
 import com.mateusz113.medical_clinic_proxy.model.visit.VisitDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Service
 @RequiredArgsConstructor
 public class VisitService {
     private final VisitClient visitClient;
-    private final Clock clock;
+    private final InternalVisitFilterMapper internalVisitFilterMapper;
 
-    public PageableContentDto<VisitDto> getDoctorVisits(
-            Long doctorId,
-            Pageable pageable
-    ) {
-        return visitClient.getDoctorVisits(doctorId, pageable, true);
+    public PageableContentDto<VisitDto> getVisits(InternalVisitFilter internalVisitFilter, Pageable pageable) {
+        ExternalVisitFilter externalVisitFilter = internalVisitFilterMapper.toExternalFilter(internalVisitFilter);
+        return visitClient.getVisits(externalVisitFilter, pageable);
     }
 
-    public PageableContentDto<VisitDto> getDoctorSpecializationVisits(
-            String doctorSpecialization,
-            Pageable pageable,
-            LocalDate visitDate
-    ) {
-        OffsetDateTime startTime = OffsetDateTime.of(visitDate.getYear(), visitDate.getMonthValue(), visitDate.getDayOfMonth(), 0, 0, 0, 0, ZoneOffset.UTC);
-        OffsetDateTime endTime = startTime;
-        endTime = endTime.plusDays(1);
-        return visitClient.getDoctorSpecializationVisits(doctorSpecialization, pageable, true, startTime, endTime);
-    }
-
-    public PageableContentDto<VisitDto> getPatientVisits(
-            Long patientId,
-            Pageable pageable
-    ) {
+    public PageableContentDto<VisitDto> getPatientVisits(Long patientId, Pageable pageable) {
         return visitClient.getPatientVisits(patientId, pageable);
     }
 
