@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "visits-client", url = "medical-clinic:8080/visits")
-public interface VisitClient {
-    @GetMapping
+@FeignClient(name = "visits-client", url = "${spring.cloud.openfeign.client.config.visits-client.url}")
+public interface MedicalClinicClient {
+    @GetMapping("/visits")
     PageableContentDto<VisitDto> getVisits(@SpringQueryMap ExternalVisitFilter visitFilter, Pageable pageable);
 
-    @GetMapping
+    @GetMapping("/visits")
     PageableContentDto<VisitDto> getPatientVisits(@RequestParam Long patientId, Pageable pageable);
 
     @PatchMapping("/{visitId}/patient/{patientId}")
