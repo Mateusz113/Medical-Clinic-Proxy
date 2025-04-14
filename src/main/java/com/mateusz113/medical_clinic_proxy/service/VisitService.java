@@ -1,6 +1,6 @@
 package com.mateusz113.medical_clinic_proxy.service;
 
-import com.mateusz113.medical_clinic_proxy.client.VisitClient;
+import com.mateusz113.medical_clinic_proxy.client.MedicalClinicClient;
 import com.mateusz113.medical_clinic_proxy.filter.visit.ExternalVisitFilter;
 import com.mateusz113.medical_clinic_proxy.filter.visit.InternalVisitFilter;
 import com.mateusz113.medical_clinic_proxy.mapper.visit.InternalVisitFilterMapper;
@@ -13,19 +13,19 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class VisitService {
-    private final VisitClient visitClient;
+    private final MedicalClinicClient medicalClinicClient;
     private final InternalVisitFilterMapper internalVisitFilterMapper;
 
     public PageableContentDto<VisitDto> getVisits(InternalVisitFilter internalVisitFilter, Pageable pageable) {
         ExternalVisitFilter externalVisitFilter = internalVisitFilterMapper.toExternalFilter(internalVisitFilter);
-        return visitClient.getVisits(externalVisitFilter, pageable);
+        return medicalClinicClient.getVisits(externalVisitFilter, pageable);
     }
 
     public PageableContentDto<VisitDto> getPatientVisits(Long patientId, Pageable pageable) {
-        return visitClient.getPatientVisits(patientId, pageable);
+        return medicalClinicClient.getPatientVisits(patientId, pageable);
     }
 
     public void registerPatientToVisit(Long visitId, Long patientId) {
-        visitClient.registerPatientToVisit(visitId, patientId);
+        medicalClinicClient.registerPatientToVisit(visitId, patientId);
     }
 }
