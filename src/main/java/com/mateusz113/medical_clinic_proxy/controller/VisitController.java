@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/visits")
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class VisitController {
             @Parameter(name = "visitFilter", description = "Optional filters for visits") @RequestParam(required = false) InternalVisitFilter internalVisitFilter,
             Pageable pageable
     ) {
+        log.info("Request received: GET /visits");
         return visitService.getVisits(internalVisitFilter, pageable);
     }
 
@@ -53,6 +56,7 @@ public class VisitController {
             @Parameter(description = "Id of the patient to get visits of") @PathVariable Long patientId,
             Pageable pageable
     ) {
+        log.info("Request received: GET /visits/patient/{}", patientId);
         return visitService.getPatientVisits(patientId, pageable);
     }
 
@@ -69,6 +73,7 @@ public class VisitController {
             @Parameter(description = "Id of the visit for the patient to be registered to") @PathVariable("visitId") Long visitId,
             @Parameter(description = "Id of the patient to be registered") @PathVariable("patientId") Long patientId
     ) {
+        log.info("Request received: PATCH /visits/{}/patient/{}", visitId, patientId);
         visitService.registerPatientToVisit(visitId, patientId);
     }
 }
