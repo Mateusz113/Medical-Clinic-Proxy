@@ -12,7 +12,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "medical-clinic-client", url = "${spring.cloud.openfeign.client.config.medical-clinic-client.url}", configuration = MedicalClinicClientConfig.class)
+@FeignClient(
+        name = "medical-clinic-client",
+        url = "${spring.cloud.openfeign.client.config.medical-clinic-client.url}",
+        configuration = MedicalClinicClientConfig.class,
+        fallback = MedicalClinicClientFallback.class
+)
 public interface MedicalClinicClient {
     @GetMapping("/visits")
     PageableContentDto<VisitDto> getVisits(@SpringQueryMap ExternalVisitFilter visitFilter, Pageable pageable);
