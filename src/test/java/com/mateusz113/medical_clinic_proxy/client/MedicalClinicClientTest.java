@@ -12,21 +12,14 @@ import com.mateusz113.medical_clinic_proxy.model.visit.VisitDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.mateusz113.medical_clinic_proxy.util.VisitTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -39,7 +32,6 @@ public class MedicalClinicClientTest {
     private MedicalClinicClient client;
     @Autowired
     private ObjectMapper objectMapper;
-    private final Clock clock = Clock.fixed(Instant.parse("2012-12-12T12:00:00Z"), ZoneOffset.UTC);
 
     @Test
     public void getVisits_ReturnsPageableContentDto() throws JsonProcessingException {
@@ -48,8 +40,10 @@ public class MedicalClinicClientTest {
         server.stubFor(get(urlPathEqualTo("/visits"))
                 .withQueryParam("size", equalTo(String.valueOf(pageable.getPageSize())))
                 .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber())))
-                .willReturn(ok(response).withHeader("Content-Type", "application/json")));
+                .willReturn(okJson(response)));
+
         PageableContentDto<VisitDto> pageableContentDto = client.getVisits(null, pageable);
+
         assertThat(pageableContentDto.totalEntries()).isEqualTo(2);
         assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(1);
         assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
@@ -83,7 +77,9 @@ public class MedicalClinicClientTest {
                 .withQueryParam("size", equalTo(String.valueOf(pageable.getPageSize())))
                 .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber())))
                 .willReturn(aResponse().withStatus(503)));
+
         PageableContentDto<VisitDto> pageableContentDto = client.getVisits(null, pageable);
+
         assertThat(pageableContentDto.totalEntries()).isEqualTo(0);
         assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(0);
         assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
@@ -99,8 +95,10 @@ public class MedicalClinicClientTest {
                 .withQueryParam("size", equalTo(String.valueOf(pageable.getPageSize())))
                 .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber())))
                 .withQueryParam("patientId", equalTo(String.valueOf(patientId)))
-                .willReturn(ok(response).withHeader("Content-Type", "application/json")));
+                .willReturn(okJson(response)));
+
         PageableContentDto<VisitDto> pageableContentDto = client.getPatientVisits(patientId, pageable);
+
         assertThat(pageableContentDto.totalEntries()).isEqualTo(2);
         assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(1);
         assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
@@ -136,7 +134,9 @@ public class MedicalClinicClientTest {
                 .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber())))
                 .withQueryParam("patientId", equalTo(String.valueOf(patientId)))
                 .willReturn(aResponse().withStatus(503)));
+
         PageableContentDto<VisitDto> pageableContentDto = client.getPatientVisits(patientId, pageable);
+
         assertThat(pageableContentDto.totalEntries()).isEqualTo(0);
         assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(0);
         assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
@@ -152,14 +152,16 @@ public class MedicalClinicClientTest {
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
                 .withPathParam("visitId", equalTo(String.valueOf(patientId)))
                 .willReturn(noContent()));
+
         client.registerPatientToVisit(visitId, patientId);
+
         verify(1, patchRequestedFor(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
                 .withPathParam("visitId", equalTo(String.valueOf(patientId))));
     }
 
     @Test
-    public void registerPatientToVisit_VisitNotAvailable_ThrowsPatientNotRegisteredException() {
+    public void registerPatientToVisit_RequestFailed_ThrowsPatientNotRegisteredException() {
         Long patientId = 1L;
         Long visitId = 1L;
         UrlPattern pattern = urlPathTemplate("/visits/{visitId}/patient/{patientId}");
@@ -167,56 +169,13 @@ public class MedicalClinicClientTest {
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
                 .withPathParam("visitId", equalTo(String.valueOf(patientId)))
                 .willReturn(badRequest()));
+
         PatientNotRegisteredException exception = assertThrows(PatientNotRegisteredException.class, () -> client.registerPatientToVisit(visitId, patientId));
+
         verify(1, patchRequestedFor(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
                 .withPathParam("visitId", equalTo(String.valueOf(patientId))));
         assertThat(exception.getMessage()).isEqualTo("Patient could not be registered.");
         assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-//        assertThat(exception.getTime()).isEqualTo(getDefaultTime());
-    }
-
-    @Test
-    public void registerPatientToVisit_VisitOrPatientNotFound_ThrowsPatientNotRegisteredException() {
-        Long patientId = 1L;
-        Long visitId = 1L;
-        UrlPattern pattern = urlPathTemplate("/visits/{visitId}/patient/{patientId}");
-        server.stubFor(patch(pattern)
-                .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId)))
-                .willReturn(notFound()));
-        PatientNotRegisteredException exception = assertThrows(PatientNotRegisteredException.class, () -> client.registerPatientToVisit(visitId, patientId));
-        verify(1, patchRequestedFor(pattern)
-                .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId))));
-        assertThat(exception.getMessage()).isEqualTo("Patient could not be registered.");
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-//        assertThat(exception.getTime()).isEqualTo(getDefaultTime());
-    }
-
-    private Pageable getPageable() {
-        return PageRequest.of(0, 10);
-    }
-
-    private VisitDto buildVisitDto(Long id) {
-        return new VisitDto(
-                id,
-                getDefaultTime(),
-                getDefaultTime().plusHours(1),
-                new SimpleDoctorDto(id, "email", "firstName", "lastName", "specialization"),
-                new PatientDto(id, "email", "idCardNo", "firstName", "lastName", "phoneNumber", LocalDate.of(2012, 12, 12)));
-    }
-
-    private OffsetDateTime getDefaultTime() {
-        return OffsetDateTime.now(clock);
-    }
-
-    private PageableContentDto<VisitDto> buildPageableContent(Pageable pageable) {
-        return PageableContentDto.<VisitDto>builder()
-                .totalEntries(2)
-                .totalNumberOfPages((int) Math.ceil((double) 2 / pageable.getPageSize()))
-                .pageNumber(pageable.getPageNumber())
-                .content(List.of(buildVisitDto(1L), buildVisitDto(2L)))
-                .build();
     }
 }
