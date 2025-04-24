@@ -36,7 +36,7 @@ public class VisitController {
     )
     @GetMapping
     public PageableContentDto<VisitDto> getVisits(
-            @Parameter(name = "visitFilter", description = "Optional filters for visits") @RequestParam(required = false) InternalVisitFilter internalVisitFilter,
+            @Parameter(name = "visitFilter", description = "Optional filters for visits") InternalVisitFilter internalVisitFilter,
             Pageable pageable
     ) {
         log.info("Request received: GET /visits");
