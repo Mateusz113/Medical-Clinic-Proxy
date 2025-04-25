@@ -28,9 +28,12 @@ public class VisitTestUtil {
                 new PatientDto(id, "email", "idCardNo", "firstName", "lastName", "phoneNumber", LocalDate.of(2012, 12, 12)));
     }
 
+    public static Clock getTestClock() {
+        return Clock.fixed(Instant.parse("2012-12-12T12:00:00Z"), ZoneOffset.UTC);
+    }
+
     public static OffsetDateTime getDefaultTime() {
-        Clock clock = Clock.fixed(Instant.parse("2012-12-12T12:00:00Z"), ZoneOffset.UTC);
-        return OffsetDateTime.now(clock);
+        return OffsetDateTime.now(getTestClock());
     }
 
     public static PageableContentDto<VisitDto> buildPageableContent(Pageable pageable) {
