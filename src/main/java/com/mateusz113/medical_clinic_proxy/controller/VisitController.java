@@ -1,11 +1,14 @@
 package com.mateusz113.medical_clinic_proxy.controller;
 
 import com.mateusz113.medical_clinic_proxy.filter.visit.InternalVisitFilter;
+import com.mateusz113.medical_clinic_proxy.model.ErrorMessage;
 import com.mateusz113.medical_clinic_proxy.model.PageableContentDto;
 import com.mateusz113.medical_clinic_proxy.model.visit.VisitDto;
 import com.mateusz113.medical_clinic_proxy.service.VisitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,6 +51,11 @@ public class VisitController {
                     responseCode = "200",
                     description = "Found patient visits",
                     useReturnTypeSchema = true
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Patient ID is null",
+                    content = @Content(schema = @Schema(implementation = ErrorMessage.class))
             )
     })
     @GetMapping("/patient/{patientId}")
@@ -65,6 +72,11 @@ public class VisitController {
             @ApiResponse(
                     responseCode = "204",
                     description = "Patient registered to visit"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Visit or patient ID is null",
+                    content = @Content(schema = @Schema(implementation = ErrorMessage.class))
             )
     })
     @PatchMapping("/{visitId}/patient/{patientId}")
