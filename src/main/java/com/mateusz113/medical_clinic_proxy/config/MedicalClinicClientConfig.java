@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class MedicalClinicClientConfig {
     @Bean
     public Retryer retryer() {
-        return new Retryer.Default();
+        return new Retryer.Default(100, 1000, 3);
     }
 
     @Bean
