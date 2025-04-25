@@ -20,7 +20,7 @@ import org.wiremock.spring.InjectWireMock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.mateusz113.medical_clinic_proxy.util.VisitTestUtil.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -44,29 +44,29 @@ public class MedicalClinicClientTest {
 
         PageableContentDto<VisitDto> pageableContentDto = client.getVisits(null, pageable);
 
-        assertThat(pageableContentDto.totalEntries()).isEqualTo(2);
-        assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(1);
-        assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
-        assertThat(pageableContentDto.content().size()).isEqualTo(2);
+        assertEquals(2, pageableContentDto.totalEntries());
+        assertEquals(1, pageableContentDto.totalNumberOfPages());
+        assertEquals(0, pageableContentDto.pageNumber());
+        assertEquals(2, pageableContentDto.content().size());
         for (int i = 0; i < pageableContentDto.content().size(); i++) {
             VisitDto visitDto = pageableContentDto.content().get(i);
-            assertThat(visitDto.id()).isEqualTo(i + 1);
-            assertThat(visitDto.startTime()).isEqualTo(getDefaultTime());
-            assertThat(visitDto.endTime()).isEqualTo(getDefaultTime().plusHours(1));
+            assertEquals(i + 1, visitDto.id());
+            assertEquals(getDefaultTime(), visitDto.startTime());
+            assertEquals(getDefaultTime().plusHours(1), visitDto.endTime());
             SimpleDoctorDto doctor = visitDto.doctor();
-            assertThat(doctor.id()).isEqualTo(i + 1);
-            assertThat(doctor.email()).isEqualTo("email");
-            assertThat(doctor.firstName()).isEqualTo("firstName");
-            assertThat(doctor.lastName()).isEqualTo("lastName");
-            assertThat(doctor.specialization()).isEqualTo("specialization");
+            assertEquals(i + 1, doctor.id());
+            assertEquals("email", doctor.email());
+            assertEquals("firstName", doctor.firstName());
+            assertEquals("lastName", doctor.lastName());
+            assertEquals("specialization", doctor.specialization());
             PatientDto patient = visitDto.patient();
-            assertThat(patient.id()).isEqualTo(i + 1);
-            assertThat(patient.email()).isEqualTo("email");
-            assertThat(patient.idCardNo()).isEqualTo("idCardNo");
-            assertThat(patient.firstName()).isEqualTo("firstName");
-            assertThat(patient.lastName()).isEqualTo("lastName");
-            assertThat(patient.phoneNumber()).isEqualTo("phoneNumber");
-            assertThat(patient.birthday()).isEqualTo("2012-12-12");
+            assertEquals(i + 1, patient.id());
+            assertEquals("email", patient.email());
+            assertEquals("idCardNo", patient.idCardNo());
+            assertEquals("firstName", patient.firstName());
+            assertEquals("lastName", patient.lastName());
+            assertEquals("phoneNumber", patient.phoneNumber());
+            assertEquals("2012-12-12", patient.birthday().toString());
         }
     }
 
@@ -80,10 +80,13 @@ public class MedicalClinicClientTest {
 
         PageableContentDto<VisitDto> pageableContentDto = client.getVisits(null, pageable);
 
-        assertThat(pageableContentDto.totalEntries()).isEqualTo(0);
-        assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(0);
-        assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
-        assertThat(pageableContentDto.content().size()).isEqualTo(0);
+        verify(3, getRequestedFor(urlPathEqualTo("/visits"))
+                .withQueryParam("size", equalTo(String.valueOf(pageable.getPageSize())))
+                .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber()))));
+        assertEquals(0, pageableContentDto.totalEntries());
+        assertEquals(0, pageableContentDto.totalNumberOfPages());
+        assertEquals(0, pageableContentDto.pageNumber());
+        assertEquals(0, pageableContentDto.content().size());
     }
 
     @Test
@@ -99,29 +102,29 @@ public class MedicalClinicClientTest {
 
         PageableContentDto<VisitDto> pageableContentDto = client.getPatientVisits(patientId, pageable);
 
-        assertThat(pageableContentDto.totalEntries()).isEqualTo(2);
-        assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(1);
-        assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
-        assertThat(pageableContentDto.content().size()).isEqualTo(2);
+        assertEquals(2, pageableContentDto.totalEntries());
+        assertEquals(1, pageableContentDto.totalNumberOfPages());
+        assertEquals(0, pageableContentDto.pageNumber());
+        assertEquals(2, pageableContentDto.content().size());
         for (int i = 0; i < pageableContentDto.content().size(); i++) {
             VisitDto visitDto = pageableContentDto.content().get(i);
-            assertThat(visitDto.id()).isEqualTo(i + 1);
-            assertThat(visitDto.startTime()).isEqualTo(getDefaultTime());
-            assertThat(visitDto.endTime()).isEqualTo(getDefaultTime().plusHours(1));
+            assertEquals(i + 1, visitDto.id());
+            assertEquals(getDefaultTime(), visitDto.startTime());
+            assertEquals(getDefaultTime().plusHours(1), visitDto.endTime());
             SimpleDoctorDto doctor = visitDto.doctor();
-            assertThat(doctor.id()).isEqualTo(i + 1);
-            assertThat(doctor.email()).isEqualTo("email");
-            assertThat(doctor.firstName()).isEqualTo("firstName");
-            assertThat(doctor.lastName()).isEqualTo("lastName");
-            assertThat(doctor.specialization()).isEqualTo("specialization");
+            assertEquals(i + 1, doctor.id());
+            assertEquals("email", doctor.email());
+            assertEquals("firstName", doctor.firstName());
+            assertEquals("lastName", doctor.lastName());
+            assertEquals("specialization", doctor.specialization());
             PatientDto patient = visitDto.patient();
-            assertThat(patient.id()).isEqualTo(i + 1);
-            assertThat(patient.email()).isEqualTo("email");
-            assertThat(patient.idCardNo()).isEqualTo("idCardNo");
-            assertThat(patient.firstName()).isEqualTo("firstName");
-            assertThat(patient.lastName()).isEqualTo("lastName");
-            assertThat(patient.phoneNumber()).isEqualTo("phoneNumber");
-            assertThat(patient.birthday()).isEqualTo("2012-12-12");
+            assertEquals(i + 1, patient.id());
+            assertEquals("email", patient.email());
+            assertEquals("idCardNo", patient.idCardNo());
+            assertEquals("firstName", patient.firstName());
+            assertEquals("lastName", patient.lastName());
+            assertEquals("phoneNumber", patient.phoneNumber());
+            assertEquals("2012-12-12", patient.birthday().toString());
         }
     }
 
@@ -137,10 +140,14 @@ public class MedicalClinicClientTest {
 
         PageableContentDto<VisitDto> pageableContentDto = client.getPatientVisits(patientId, pageable);
 
-        assertThat(pageableContentDto.totalEntries()).isEqualTo(0);
-        assertThat(pageableContentDto.totalNumberOfPages()).isEqualTo(0);
-        assertThat(pageableContentDto.pageNumber()).isEqualTo(0);
-        assertThat(pageableContentDto.content().size()).isEqualTo(0);
+        verify(3, getRequestedFor(urlPathEqualTo("/visits"))
+                .withQueryParam("size", equalTo(String.valueOf(pageable.getPageSize())))
+                .withQueryParam("page", equalTo(String.valueOf(pageable.getPageNumber())))
+                .withQueryParam("patientId", equalTo(String.valueOf(patientId))));
+        assertEquals(0, pageableContentDto.totalEntries());
+        assertEquals(0, pageableContentDto.totalNumberOfPages());
+        assertEquals(0, pageableContentDto.pageNumber());
+        assertEquals(0, pageableContentDto.content().size());
     }
 
     @Test
@@ -150,14 +157,14 @@ public class MedicalClinicClientTest {
         UrlPattern pattern = urlPathTemplate("/visits/{visitId}/patient/{patientId}");
         server.stubFor(patch(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId)))
+                .withPathParam("patientId", equalTo(String.valueOf(patientId)))
                 .willReturn(noContent()));
 
         client.registerPatientToVisit(visitId, patientId);
 
         verify(1, patchRequestedFor(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId))));
+                .withPathParam("patientId", equalTo(String.valueOf(patientId))));
     }
 
     @Test
@@ -167,15 +174,15 @@ public class MedicalClinicClientTest {
         UrlPattern pattern = urlPathTemplate("/visits/{visitId}/patient/{patientId}");
         server.stubFor(patch(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId)))
+                .withPathParam("patientId", equalTo(String.valueOf(patientId)))
                 .willReturn(badRequest()));
 
         PatientNotRegisteredException exception = assertThrows(PatientNotRegisteredException.class, () -> client.registerPatientToVisit(visitId, patientId));
 
         verify(1, patchRequestedFor(pattern)
                 .withPathParam("visitId", equalTo(String.valueOf(visitId)))
-                .withPathParam("visitId", equalTo(String.valueOf(patientId))));
-        assertThat(exception.getMessage()).isEqualTo("Patient could not be registered.");
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                .withPathParam("patientId", equalTo(String.valueOf(patientId))));
+        assertEquals("Patient could not be registered.", exception.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 }
